@@ -272,3 +272,90 @@ app.listen(app.get('port'), function() {
 });
 
 //AGGIUNGERE QUI SOTTO NUOVE FUNZIONI
+/**
+ * @brief returns the list of students
+ * @return a static page.
+ */
+app.post('/searchByMark', function(request, response) 
+{
+	var headers = {};
+	headers["Access-Control-Allow-Origin"] = "*";
+	headers["Access-Control-Allow-Methods"] = "POST, GET, PUT, DELETE, OPTIONS";
+	headers["Access-Control-Allow-Credentials"] = false;
+	headers["Access-Control-Max-Age"] = '86400'; // 24 hours
+	headers["Access-Control-Allow-Headers"] = "X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept";
+	headers["Content-Type"] = "application/json";
+
+	var criterio;
+	
+	//check body and parameters
+	if ( typeof request.body !== 'undefined' && request.body)
+	{
+		if ( typeof request.body.mark !== 'undefined' && request.body.mark)
+            {
+			 criterio = request.body.mark;
+            }
+		else 
+			criterio = "not defined";
+	
+	}
+	else
+	{
+		criterio = "body undefined";
+	}
+    
+    if (criterio!="not defined" && criterio!="body undefined")
+	{
+        if(criterio.length > 1)
+        {
+            //aceptable input
+            //search student
+            var listaStudenti = studentManager.getList();
+            var listaStudentiIdonei = [];
+            //if exists
+            if (listaStudenti != null)
+            {
+                var simbolo = criterio[0];
+                var voto = criterio[1];
+                console.log("Simbolo " + simbolo);
+                console.log("Voto " + voto);
+                console.log("Numero studenti: " + listaStudenti.length);
+                for (i=0; i < listaStudenti.length; i++)
+	            {
+                    //console.log("Valuto studente...");
+                    if(simbolo == ">"){
+                        if (parseInt(listaStudenti[i].mark) > parseInt(voto))
+                        {
+                            console.log(listaStudenti[1].SSN.toString());
+					       listaStudentiIdonei.push(listaStudenti[i]);
+                        }
+                    }else if(simbolo == "<"){
+                        if (parseInt(listaStudenti[i].mark) < parseInt(voto))
+                        {
+                            console.log(listaStudenti[1].SSN.toString());
+					       listaStudentiIdonei.push(listaStudenti[i]);
+                        }  
+                    }
+                }
+                response.writeHead(200, headers);
+                response.end(JSON.stringify(listaStudentiIdonei));
+            }
+            else
+            {
+                response.writeHead(404, headers);
+                response.end(JSON.stringify());
+            }
+        }
+        else
+        {
+            response.writeHead(404, headers);
+			response.end(JSON.stringify());           
+        }
+	}
+    else    
+	{
+		//unaceptable input
+		response.writeHead(406, headers);
+		response.end(JSON.stringify("1"));
+	}
+});
